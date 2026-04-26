@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Boost Button</title>
+
+<style>
+  .scene {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    background: radial-gradient(ellipse at 60% 40%, #000000 0%, #000000 50%, #000000 100%);
+    border-radius: 16px;
+    min-height: 200px;
+  }
+
+  .boost-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* glow halo */
+  .boost-wrap::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: 999px;
+    background: conic-gradient(from var(--a, 0deg), #e879f9, #a855f7, #818cf8, #e879f9);
+    filter: blur(12px);
+    opacity: 0;
+    transition: opacity 0.3s;
+    animation: none;
+    z-index: 0;
+  }
+
+  .boost-wrap:hover::before {
+    opacity: 0.7;
+    animation: spin-halo 3s linear infinite;
+  }
+
+  @property --a {
+    syntax: '<angle>';
+    inherits: false;
+    initial-value: 0deg;
+  }
+
+  @keyframes spin-halo {
+    to { --a: 360deg; }
+  }
+
+  /* button */
+
+  .boost-btn {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 11px 22px;
+
+    border-radius: 999px;
+
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.35);
+
+    color: rgba(255,255,255,0.9);
+
+    font-family: 'gg sans','Noto Sans',Whitney,'Helvetica Neue',Arial,sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+
+    -webkit-font-smoothing: antialiased;
+
+    box-shadow: 0 0 0 0 rgba(0,0,0,0);
+
+    transition:
+      transform 0.15s ease,
+      background 0.15s ease,
+      color 0.15s ease,
+      box-shadow 0.15s ease,
+      border-color 0.15s ease;
+
+    overflow: hidden;
+  }
+
+  .boost-btn:hover {
+    transform: translateY(-2px) scale(1.03);
+
+    background: rgba(255,255,255,1);
+    color: #1a1032;
+
+    border-color: rgba(255,255,255,0.9);
+
+    box-shadow:
+      0 6px 28px rgba(255,255,255,0.25),
+      0 0 40px rgba(200,120,255,0.35);
+  }
+
+  .boost-btn:active {
+    transform: scale(0.96);
+  }
+
+  /* shimmer */
+  .shimmer {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(
+      105deg,
+      transparent 30%,
+      rgba(255,255,255,0.75) 50%,
+      transparent 70%
+    );
+    transform: skewX(-15deg);
+    animation: shimmer-sweep 2.4s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes shimmer-sweep {
+    0%   { left: -100%; opacity: 0; }
+    15%  { opacity: 1; }
+    55%  { left: 160%; opacity: 1; }
+    70%  { opacity: 0; }
+    100% { left: 160%; opacity: 0; }
+  }
+
+  /* sparkles */
+  .sparkle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    pointer-events: none;
+    opacity: 0;
+    z-index: 2;
+  }
+
+  .sparkle svg { width: 100%; height: 100%; }
+
+  .sp1  { top: -14px; left: 18%; animation: float-spark 3.2s 0s infinite; }
+  .sp2  { top: -10px; left: 55%; animation: float-spark 2.8s 0.5s infinite; }
+  .sp3  { top: -12px; right: 20%; animation: float-spark 3.5s 0.9s infinite; }
+  .sp4  { bottom: -14px; left: 30%; animation: float-spark 3s 1.2s infinite; }
+  .sp5  { bottom: -10px; right: 25%; animation: float-spark 2.6s 0.3s infinite; }
+  .sp6  { top: 50%; left: -16px; transform: translateY(-50%); animation: float-spark 3.3s 0.7s infinite; }
+  .sp7  { top: 50%; right: -16px; transform: translateY(-50%); animation: float-spark 2.9s 1.5s infinite; }
+
+  @keyframes float-spark {
+    0%   { opacity: 0; transform: translateY(0) scale(0.5); }
+    20%  { opacity: 1; transform: translateY(-4px) scale(1.1); }
+    50%  { opacity: 0.8; transform: translateY(-8px) scale(0.9); }
+    80%  { opacity: 0.4; transform: translateY(-12px) scale(0.6); }
+    100% { opacity: 0; transform: translateY(-16px) scale(0.3); }
+  }
+
+  .sparkle-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+  }
+</style>
+</head>
+
+<body>
+
+<canvas class="sparkle-canvas" id="sc"></canvas>
+
+<div class="scene">
+  <div class="boost-wrap" id="wrap">
+
+    <!-- sparkles -->
+    <div class="sparkle sp1"><svg viewBox="0 0 10 10"><path d="M5 0L5.8 4.2 10 5 5.8 5.8 5 10 4.2 5.8 0 5 4.2 4.2Z" fill="#e879f9"/></svg></div>
+    <div class="sparkle sp2"><svg viewBox="0 0 10 10"><path d="M5 0L5.8 4.2 10 5 5.8 5.8 5 10 4.2 5.8 0 5 4.2 4.2Z" fill="#a78bfa"/></svg></div>
+    <div class="sparkle sp3"><svg viewBox="0 0 10 10"><path d="M5 0L5.8 4.2 10 5 5.8 5.8 5 10 4.2 5.8 0 5 4.2 4.2Z" fill="#f0abfc"/></svg></div>
+    <div class="sparkle sp4"><svg viewBox="0 0 10 10"><path d="M5 0L5.8 4.2 10 5 5.8 5.8 5 10 4.2 5.8 0 5 4.2 4.2Z" fill="#c084fc"/></svg></div>
+    <div class="sparkle sp5"><svg viewBox="0 0 10 10"><path d="M5 0L5.8 4.2 10 5 5.8 5.8 5 10 4.2 5.8 0 5 4.2 4.2Z" fill="#e879f9"/></svg></div>
+    <div class="sparkle sp6"><svg viewBox="0 0 10 10"><path d="M5 0L5.8 4.2 10 5 5.8 5.8 5 10 4.2 5.8 0 5 4.2 4.2Z" fill="#818cf8"/></svg></div>
+    <div class="sparkle sp7"><svg viewBox="0 0 10 10"><path d="M5 0L5.8 4.2 10 5 5.8 5.8 5 10 4.2 5.8 0 5 4.2 4.2Z" fill="#f0abfc"/></svg></div>
+
+    <button class="boost-btn" id="bb">
+      <div class="shimmer"></div>
+      TestButton
+    </button>
+
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('sc');
+const ctx = canvas.getContext('2d');
+let pts = [], raf = null;
+
+function burst(ox, oy) {
+  const cols = ['#e879f9','#a855f7','#8b5cf6','#c084fc','#ffffff','#f0abfc','#818cf8','#f472b6'];
+  for (let i = 0; i < 50; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const s = 2 + Math.random() * 6;
+    pts.push({
+      x: ox, y: oy,
+      vx: Math.cos(a)*s, vy: Math.sin(a)*s - 2.5,
+      r: 2 + Math.random()*3.5,
+      col: cols[Math.floor(Math.random()*cols.length)],
+      alpha: 1,
+      decay: 0.016 + Math.random()*0.02,
+      ang: Math.random()*Math.PI*2,
+      spin: (Math.random()-0.5)*0.3,
+      shape: Math.random() > 0.45 ? 'diamond' : 'circle'
+    });
+  }
+  if (!raf) tick();
+}
+
+function tick() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  pts = pts.filter(p => p.alpha > 0.02);
+
+  pts.forEach(p => {
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.1;
+    p.vx *= 0.99;
+    p.alpha -= p.decay;
+    p.ang += p.spin;
+
+    ctx.save();
+    ctx.globalAlpha = p.alpha;
+    ctx.fillStyle = p.col;
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.ang);
+
+    if (p.shape === 'diamond') {
+      ctx.beginPath();
+      ctx.moveTo(0, -p.r*1.5);
+      ctx.lineTo(p.r*0.8, 0);
+      ctx.lineTo(0, p.r*1.5);
+      ctx.lineTo(-p.r*0.8, 0);
+      ctx.closePath();
+      ctx.fill();
+    } else {
+      ctx.beginPath();
+      ctx.arc(0, 0, p.r, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    ctx.restore();
+  });
+
+  raf = pts.length > 0 ? requestAnimationFrame(tick) : null;
+}
+
+document.getElementById('bb').addEventListener('click', e => {
+  burst(e.clientX, e.clientY);
+
+  const r = e.currentTarget.getBoundingClientRect();
+  setTimeout(() =>
+    burst(r.left + r.width/2, r.top + r.height/2),
+    80
+  );
+});
+</script>
+
+</body>
+</html>
